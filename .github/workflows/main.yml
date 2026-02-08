@@ -17,29 +17,25 @@ jobs:
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
     - name: Membuat Tunnel Ngrok
       run: |
-        Start-Process ngrok -ArgumentList "tcp 3389"
+        # Menjalankan ngrok di background dan menyimpan log ke file
+        Start-Process ngrok -ArgumentList "tcp 3389 --log=stdout" -RedirectStandardOutput "ngrok.log"
     - name: MENDAPATKAN ALAMAT RDP
       run: |
-        $attempts = 0
-        $PublicUrl = ""
-        while ($attempts -lt 10 -and -not $PublicUrl) {
-          Start-Sleep -Seconds 10
-          try {
-            $Response = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
-            $PublicUrl = $Response.tunnels.public_url
-          } catch {
-            Write-Host "Menunggu Ngrok siap... (Percobaan $((++$attempts)))"
-          }
+        Start-Sleep -Seconds 20
+        $Response = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
+        $PublicUrl = $Response.tunnels.public_url
+        if ($PublicUrl) {
+          Write-Host "=========================================="
+          Write-Host "ALAMAT RDP ANDA: $PublicUrl"
+          Write-Host "=========================================="
+        } else {
+          Write-Host "Gagal mendapatkan URL. Menampilkan log Ngrok:"
+          Get-Content ngrok.log
         }
-        Write-Host "=========================================="
-        Write-Host "ALAMAT RDP ANDA: $PublicUrl"
-        Write-Host "=========================================="
     - name: Menjaga RDP Tetap Aktif
       run: |
-        Write-Host "RDP Berhasil Aktif!"
         $i = 360
         do {
             Write-Host "Sisa waktu: $i menit"
