@@ -21,11 +21,19 @@ jobs:
     - name: Membuat Tunnel Ngrok
       run: |
         Start-Process ngrok -ArgumentList "tcp 3389"
-    - name: CEK ALAMAT RDP ANDA DISINI
+    - name: MENDAPATKAN ALAMAT RDP
       run: |
-        Start-Sleep -Seconds 30
-        $Response = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
-        $PublicUrl = $Response.tunnels.public_url
+        $attempts = 0
+        $PublicUrl = ""
+        while ($attempts -lt 10 -and -not $PublicUrl) {
+          Start-Sleep -Seconds 10
+          try {
+            $Response = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
+            $PublicUrl = $Response.tunnels.public_url
+          } catch {
+            Write-Host "Menunggu Ngrok siap... (Percobaan $((++$attempts)))"
+          }
+        }
         Write-Host "=========================================="
         Write-Host "ALAMAT RDP ANDA: $PublicUrl"
         Write-Host "=========================================="
