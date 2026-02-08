@@ -7,22 +7,25 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Mendownload Ngrok & Setup RDP
-      run: |
-        Invoke-WebRequest https://bin.equinox.io/c/b342Pueeb2T/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
-        Expand-Archive ngrok.zip
+    - name: Instalasi Ngrok via Choco
+      run: choco install ngrok
     - name: Mengautentikasi Ngrok
-      run: .\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+      run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Mengatur Password RDP
+      run: net user runneradmin ${{ secrets.USER_PASSWORD }}
     - name: Mengaktifkan Akses RDP
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
     - name: Membuat Tunnel Ngrok
-      run: Start-Process Powershell -ArgumentList '-NoExit -Command ".\ngrok\ngrok.exe tcp 3389"'
+      run: Start-Process powershell -ArgumentList "-NoExit -Command 'ngrok tcp 3389'"
     - name: Menjaga RDP Tetap Aktif
       run: |
-        echo "RDP Berhasil Dibuat!"
-        echo "Username: runneradmin"
-        echo "Password: Password yang kamu buat di Windows (atau default runner)"
-        cmd /c loop.bat
+        Write-Host "RDP Berhasil Aktif!"
+        $i = 360
+        do {
+            Write-Host "Sisa waktu: $i menit"
+            Start-Sleep -Seconds 60
+            $i--
+        } while ($i -gt 0)
