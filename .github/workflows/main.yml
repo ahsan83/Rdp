@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Instalasi Ngrok via Choco
+    - name: Instalasi Ngrok Otomatis
       run: choco install ngrok
     - name: Mengautentikasi Ngrok
       run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
@@ -23,6 +23,7 @@ jobs:
     - name: Menjaga RDP Tetap Aktif
       run: |
         Write-Host "RDP Berhasil Aktif!"
+        Write-Host "Cek alamat IP di dashboard Ngrok Anda."
         $i = 360
         do {
             Write-Host "Sisa waktu: $i menit"
