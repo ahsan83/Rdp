@@ -20,17 +20,16 @@ jobs:
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
     - name: Membuat Tunnel Ngrok
       run: Start-Process powershell -ArgumentList "-NoExit -Command 'ngrok tcp 3389'"
-    - name: MENDAPATKAN ALAMAT IP RDP
+    - name: CEK ALAMAT RDP ANDA DISINI
       run: |
-        Start-Sleep -Seconds 12
+        Start-Sleep -Seconds 15
         $Response = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
         $PublicUrl = $Response.tunnels.public_url
         Write-Host "=========================================="
-        Write-Host "ALAMAT RDP ANDA: $PublicUrl"
+        Write-Host "ALAMAT RDP: $PublicUrl"
         Write-Host "=========================================="
     - name: Menjaga RDP Tetap Aktif
       run: |
-        Write-Host "RDP Sedang Berjalan..."
         $i = 360
         do {
             Write-Host "Sisa waktu: $i menit"
