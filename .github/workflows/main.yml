@@ -23,10 +23,10 @@ jobs:
     - name: Menjaga RDP Tetap Aktif
       run: |
         Write-Host "RDP Berhasil Aktif!"
-        Write-Host "Cek alamat IP di dashboard Ngrok Anda."
+        Write-Host "Cek alamat IP di dashboard Ngrok Anda (Menu Endpoints)."
         $i = 360
         do {
-            Write-Host "Sisa waktu: $i menit"
+            Write-Host "Sisa waktu aktif: $i menit"
             Start-Sleep -Seconds 60
             $i--
         } while ($i -gt 0)
