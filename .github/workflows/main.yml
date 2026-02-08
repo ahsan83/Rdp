@@ -1,28 +1,16 @@
-name: GitHub-RDP
-
-on: 
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-    - name: Instalasi Ngrok Otomatis
-      run: choco install ngrok
-    - name: Mengautentikasi Ngrok
-      run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-    - name: Mengatur Password RDP
-      run: net user runneradmin ${{ secrets.USER_PASSWORD }}
-    - name: Mengaktifkan Akses RDP
+- name: Membuat Tunnel Ngrok
       run: |
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
-    - name: Membuat Tunnel Ngrok
-      run: Start-Process powershell -ArgumentList "-NoExit -Command 'ngrok tcp 3389'"
+        Start-Process powershell -ArgumentList "-NoExit -Command 'ngrok tcp 3389'"
+        Start-Sleep -Seconds 10
+    - name: Tampilkan URL RDP
+      run: |
+        $Response = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
+        $PublicUrl = $Response.tunnels.public_url
+        Write-Host "=========================================="
+        Write-Host "ALAMAT RDP KAMU: $PublicUrl"
+        Write-Host "=========================================="
     - name: Menjaga RDP Tetap Aktif
       run: |
-        Write-Host "RDP Berhasil Aktif!"
         $i = 360
         do {
             Write-Host "Sisa waktu: $i menit"
